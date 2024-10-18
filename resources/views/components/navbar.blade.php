@@ -173,12 +173,26 @@
                             'content') // Include CSRF token
                     },
                     success: function(response) {
-                        console.log("Logout successful:", response);
-                        window.location.href = '/login'; // Redirect to login page or homepage
+                        // Handle successful login
+                        Swal.fire({
+                            title: 'Logout Successful!',
+                            text: 'You will be redirected shortly.',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href =
+                                '/login'; // Redirect to login page or homepage
+                        });
                     },
                     error: function(xhr, status, error) {
                         console.error("Error during logout:", xhr.responseText);
-                        alert('An error occurred while logging out.');
+                        Swal.fire({
+                            title: 'Error during logout',
+                            text: xhr.responseText,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 });
             });

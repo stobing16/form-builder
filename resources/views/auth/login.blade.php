@@ -5,7 +5,7 @@
     <section class="vh-100" style="background-color: rgb(236, 236, 236);">
         <div class="container h-100">
             <div class="row d-flex align-items-center justify-content-center h-100">
-                <div class="col-md-9 col-lg-6 col-xl-6 offset-xl-1">
+                <div class="col-md-10 col-lg-5 col-xl-5">
                     <div class="card shadow"> <!-- Background biru terang dan shadow -->
                         <div class="card-body">
                             <h2 class="text-center mb-6">Login Page</h2>
@@ -25,7 +25,6 @@
                                 </div>
 
                                 <!-- Submit button -->
-                                {{-- data-mdb-button-init data-mdb-ripple-init --}}
                                 <button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
                             </form>
                         </div>
@@ -35,6 +34,7 @@
         </div>
     </section>
 @endsection
+
 
 @push('css')
     <style>
@@ -55,25 +55,45 @@
                 e.preventDefault(); // Prevent default form submission
 
                 $.ajax({
-                    url: '{{ route('login') }}', // Ensure this route matches your login route
+                    url: "{{ route('login') }}", // Ensure this route matches your login route
                     method: 'POST',
                     data: $(this).serialize(), // Serialize the form data
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                            'content') // Add CSRF token to the headers
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]')
+                            .attr('content') // Add CSRF token to the headers
                     },
-                    success: function(response) {
+                    success: function() {
                         // Handle successful login
-                        window.location.href = response.redirect; // Redirect user
+                        Swal.fire({
+                            title: 'Login Successful!',
+                            text: 'You will be redirected shortly.',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = '/'; // Redirect user
+                        });
                     },
                     error: function(xhr) {
                         // Handle errors
                         let errors = xhr.responseJSON.errors;
                         let errorMsg = '';
-                        for (const [key, value] of Object.entries(errors)) {
-                            errorMsg += value.join(', ') + '\n'; // Concatenate error messages
+
+                        if (errors) {
+                            for (const [key, value] of Object.entries(errors)) {
+                                errorMsg += value.join(', ') +
+                                    '\n'; // Concatenate error messages
+                            }
+                        } else {
+                            errorMsg = 'An unexpected error occurred. Please try again.';
                         }
-                        alert(errorMsg); // Display errors
+
+                        Swal.fire({
+                            title: 'Login Failed!',
+                            text: errorMsg,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 });
             });

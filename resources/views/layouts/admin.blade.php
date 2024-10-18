@@ -7,6 +7,8 @@
         @include('components.navbar')
 
         <div class="container content mt-2">
+            {{-- @include('components.breadcrumbs') --}}
+
             @yield('content')
         </div>
     </div>
