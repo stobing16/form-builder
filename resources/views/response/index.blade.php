@@ -1,12 +1,11 @@
 @extends('layouts.admin')
-
 @section('content')
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3>Forms</h3>
-            <a href="{{ route('forms.create') }}" type="button" class="btn btn-primary">
+            <h3>Response</h3>
+            {{-- <a href="{{ route('forms.create') }}" type="button" class="btn btn-primary">
                 Add Forms
-            </a>
+            </a> --}}
         </div>
         <div class="card">
             <div class="card-body card-dashboard">
@@ -16,7 +15,8 @@
                             <tr>
                                 <th>No</th>
                                 <th>Forms</th>
-                                <th>Status</th>
+                                <th>Tanggal Publish</th>
+                                <th>Jumlah Response</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -36,7 +36,7 @@
             var table = $('#forms-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('forms') }}", // Mengarah ke route yang sama
+                ajax: "{{ route('response') }}", // Mengarah ke route yang sama
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -48,12 +48,12 @@
                         name: 'title'
                     },
                     {
-                        data: 'is_active',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return (data == 1) ? '<span class="badge rounded-pill text-bg-primary">Active</span>' : '<span class="badge rounded-pill text-bg-danger">Inactive</span>'
-                        }
+                        data: 'updated_at',
+                        name: 'updated_at'
+                    },
+                    {
+                        data: 'total_response',
+                        name: 'total_response'
                     },
                     {
                         data: 'action',
@@ -66,16 +66,13 @@
 
             $(document).on('click', '.show', function() {
                 const id = $(this).data('id');
-                window.location.href = "{{ route('forms.show', ':id') }}".replace(':id', id);
+                window.location.href = "{{ route('response.show', ':id') }}".replace(':id', id);
             })
 
-            $(document).on('click', '.edit', function() {
-                const id = $(this).data('id');
-                window.location.href = "{{ route('forms.edit', ':id') }}".replace(':id', id);
-            })
+            // $(document).on('click', '.edit', function() {
+            //     const id = $(this).data('id');
+            //     window.location.href = "{{ route('forms.edit', ':id') }}".replace(':id', id);
+            // })
         });
     </script>
 @endpush
-
-<style>
-</style>

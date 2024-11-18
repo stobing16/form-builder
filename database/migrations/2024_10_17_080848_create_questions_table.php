@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('form_id')->constrained()->onDelete('cascade');
             $table->longText('question');
+            $table->longText('slug');
+            $table->longText('catatan')->nullable();
             $table->foreignId('question_type_id')->constrained()->onDelete('cascade');
-            $table->json('options');
+            $table->boolean('is_required');
+            $table->json('options')->nullable();
             $table->timestamps();
         });
     }

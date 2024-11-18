@@ -1,12 +1,21 @@
 @extends('layouts.admin')
-
 @section('content')
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3>Forms</h3>
-            <a href="{{ route('forms.create') }}" type="button" class="btn btn-primary">
-                Add Forms
+            <h3>User Management</h3>
+            <a href="{{ route('users.create') }}" type="button" class="btn btn-primary">
+                Add User
             </a>
+        </div>
+
+        <!-- Filter by Role -->
+        <div class="mb-3 gap-2">
+            <label for="roleFilter">Role : </label>
+            <select id="roleFilter" class="form-control">
+                <option value="">Select Role</option>
+                <option value="super-admin">Super Admin</option>
+                <option value="admin">Admin</option>
+            </select>
         </div>
         <div class="card">
             <div class="card-body card-dashboard">
@@ -15,8 +24,9 @@
                         <thead class="thead-light">
                             <tr>
                                 <th>No</th>
-                                <th>Forms</th>
-                                <th>Status</th>
+                                <th>User Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -29,14 +39,21 @@
         </div>
     </div>
 @endsection
-
 @push('script')
     <script>
         $(document).ready(function() {
             var table = $('#forms-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('forms') }}", // Mengarah ke route yang sama
+                ajax: {
+                    url: "{{ route('users') }}",
+                    data: function(d) {
+                        d.role = $('#roleFilter').val();
+                    }
+                },
+                initComplete: function(settings, json) {
+                    $('#dataTable_length').append('<label>&nbsp; App ID:</label>');
+                },
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -44,16 +61,16 @@
                         searchable: false
                     },
                     {
-                        data: 'title',
-                        name: 'title'
+                        data: 'name',
+                        name: 'name'
                     },
                     {
-                        data: 'is_active',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return (data == 1) ? '<span class="badge rounded-pill text-bg-primary">Active</span>' : '<span class="badge rounded-pill text-bg-danger">Inactive</span>'
-                        }
+                        data: 'email',
+                        name: 'email'
+                    },
+                    {
+                        data: 'role',
+                        name: 'role'
                     },
                     {
                         data: 'action',
@@ -64,18 +81,14 @@
                 ]
             });
 
-            $(document).on('click', '.show', function() {
-                const id = $(this).data('id');
-                window.location.href = "{{ route('forms.show', ':id') }}".replace(':id', id);
-            })
+            $('#roleFilter').on('change', function() {
+                table.draw();
+            });
 
             $(document).on('click', '.edit', function() {
                 const id = $(this).data('id');
-                window.location.href = "{{ route('forms.edit', ':id') }}".replace(':id', id);
+                window.location.href = "{{ route('users.edit', ':id') }}".replace(':id', id);
             })
         });
     </script>
 @endpush
-
-<style>
-</style>

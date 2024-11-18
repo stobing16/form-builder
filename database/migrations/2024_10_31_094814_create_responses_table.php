@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('forms', function (Blueprint $table) {
+        Schema::create('responses', function (Blueprint $table) {
             $table->id();
-            $table->longtext('unique_url')->unique();
-            $table->string('title');
-            $table->string('slug');
-            $table->longText('description')->nullable();
-            $table->boolean('is_active');
+            $table->foreignId('form_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('forms');
+        Schema::dropIfExists('responses');
     }
 };

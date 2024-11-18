@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('question_types', function (Blueprint $table) {
             $table->id();
-            $table->string('question_type');
+            $table->string('type');
+            $table->string('label');
+            $table->boolean('has_options');
             $table->boolean('is_active');
             $table->timestamps();
         });

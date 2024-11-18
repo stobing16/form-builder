@@ -9,42 +9,48 @@ class SidebarComposer
     public function compose(View $view)
     {
         $sidebarItems = [
-            [
-                'title' => 'Dashboard',
-                'icon' => 'bi-house-fill',
-                'link' => '#',
-                'active' => false,
-            ],
+            // [
+            //     'title' => 'Dashboard',
+            //     'icon' => 'bi-house-fill',
+            //     'link' => '#',
+            //     'active' => false,
+            // ],
             [
                 'title' => 'Forms',
-                'icon' => 'bi-house-fill',
+                'icon' => 'bi-file-earmark-text',
                 'link' => route('forms'),
-                'active' => request()->routeIs('forms'),
+                'active' => request()->routeIs('forms') || request()->routeIs('forms.*') || request()->routeIs('forms.question.*'),
             ],
             [
-                'title' => 'Users',
-                'icon' => 'bi-people-fill',
-                'link' => '#',
-                'active' => false,
+                'title' => 'Response',
+                'icon' => 'bi-file-earmark-ruled',
+                'link' => route('response'),
+                'active' => request()->routeIs('response') || request()->routeIs('response.*'),
             ],
-            [
-                'title' => 'Settings',
-                'icon' => 'bi-gear-fill',
-                'dropdown' => [
-                    [
-                        'title' => 'Profile Settings',
-                        'icon' => 'bi-sliders2',
-                        'link' => '#',
-                        'active' => false,
-                    ],
-                    [
-                        'title' => 'Account Settings',
-                        'icon' => 'bi-sliders2',
-                        'link' => '#',
-                        'active' => false,
-                    ],
-                ],
-            ],
+            // [
+            //     'title' => 'User Management',
+            //     'icon' => 'bi-people',
+            //     'link' => route('users'),
+            //     'active' => request()->routeIs('users') || request()->routeIs('users.*'),
+            // ],
+            // [
+            //     'title' => 'Settings',
+            //     'icon' => 'bi-gear-fill',
+            //     'dropdown' => [
+            //         [
+            //             'title' => 'Profile Settings',
+            //             'icon' => 'bi-sliders2',
+            //             'link' => '#',
+            //             'active' => false,
+            //         ],
+            //         [
+            //             'title' => 'Account Settings',
+            //             'icon' => 'bi-sliders2',
+            //             'link' => '#',
+            //             'active' => false,
+            //         ],
+            //     ],
+            // ],
         ];
 
         // Periksa dropdown dan atur 'active' pada parent jika ada item aktif

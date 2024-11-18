@@ -8,7 +8,6 @@
 
         <div class="container content mt-2">
             {{-- @include('components.breadcrumbs') --}}
-
             @yield('content')
         </div>
     </div>
@@ -18,8 +17,7 @@
     <style>
         body {
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
             font-family: 'Poppins', sans-serif;
         }
 
@@ -29,6 +27,25 @@
             @media (max-width: 768px) {
                 margin-left: 0;
             }
+        }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background-color: #007bff !important;
+            color: black;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
         }
     </style>
 @endpush
