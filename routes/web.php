@@ -68,6 +68,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('account')->group(function () {
         Route::get('/', [AccountController::class, 'index'])->name('account');
+        Route::get('/change-password', [AccountController::class, 'changePassword'])->name('account.change-password');
+        Route::post('/change-password', [AccountController::class, 'changePasswordStore'])->name('account.change-password.store');
     });
 });
 
