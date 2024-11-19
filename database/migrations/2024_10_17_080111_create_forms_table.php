@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->longtext('unique_url')->unique();
+            $table->string('unique_url', 100)->unique();
             $table->string('title');
             $table->string('slug');
             $table->longText('description')->nullable();
