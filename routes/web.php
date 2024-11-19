@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResponseController;
@@ -44,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('users');
         // Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
@@ -62,6 +64,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [ResponseController::class, 'show'])->name('response.show');
         Route::get('/detail/{id}', [ResponseController::class, 'detail'])->name('response.detail');
         Route::get('/export-excel/{id}', [ResponseController::class, 'exportExcel'])->name('response.export-excel');
+    });
+
+    Route::prefix('account')->group(function () {
+        Route::get('/', [AccountController::class, 'index'])->name('account');
     });
 });
 

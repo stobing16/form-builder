@@ -27,12 +27,18 @@ class SidebarComposer
                 'link' => route('response'),
                 'active' => request()->routeIs('response') || request()->routeIs('response.*'),
             ],
-            // [
-            //     'title' => 'User Management',
-            //     'icon' => 'bi-people',
-            //     'link' => route('users'),
-            //     'active' => request()->routeIs('users') || request()->routeIs('users.*'),
-            // ],
+            [
+                'title' => 'User Management',
+                'icon' => 'bi-people',
+                'link' => route('users'),
+                'active' => request()->routeIs('users') || request()->routeIs('users.*'),
+            ],
+            [
+                'title' => 'Account',
+                'icon' => 'bi-person-circle',
+                'link' => route('account'),
+                'active' => request()->routeIs('account') || request()->routeIs('account.*'),
+            ],
             // [
             //     'title' => 'Settings',
             //     'icon' => 'bi-gear-fill',

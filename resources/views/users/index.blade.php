@@ -89,6 +89,54 @@
                 const id = $(this).data('id');
                 window.location.href = "{{ route('users.edit', ':id') }}".replace(':id', id);
             })
+
+            $(document).on('click', '.delete', function(e) {
+                e.preventDefault();
+
+                var id = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Hapus user ini?',
+                    text: '',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('users.delete', ':id') }}".replace(':id', id),
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token for Laravel (if needed)
+                            },
+                            success: function(response) {
+                                // Show success alert
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: 'The user has been deleted.',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => {
+                                    table.draw()
+                                });
+                            },
+                            error: function(xhr) {
+                                // Handle any errors here
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: 'Something went wrong. Try again later!',
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
         });
     </script>
 @endpush
