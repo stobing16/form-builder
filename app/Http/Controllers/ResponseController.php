@@ -118,6 +118,7 @@ class ResponseController extends Controller
         // Menentukan file output untuk menulis
         $path = 'response-' . $form->slug . '.xlsx';
 
+
         // Menulis data ke dalam file Excel
         $writer =  SimpleExcelWriter::create(public_path($path))
             ->addHeader(array_values($headers))
@@ -125,7 +126,10 @@ class ResponseController extends Controller
 
         $writer->close();
 
-        return response()->file(public_path($path), [
+        $filePath = public_path($path);
+        chmod($filePath, 0755);
+
+        return response()->file($filePath, [
             'Content-Disposition' => 'attachment; filename="' . $path . '"'
         ])->deleteFileAfterSend(true);
     }
