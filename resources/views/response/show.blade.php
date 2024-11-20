@@ -79,7 +79,6 @@
                     },
                     success: function(response, status, xhr) {
                         var disposition = xhr.getResponseHeader('Content-Disposition');
-                        console.log(disposition)
 
                         var matches = /"([^"]*)"/.exec(disposition);
                         var filename = (matches != null && matches[1] ? matches[1] : 'export.xlsx');
@@ -99,15 +98,16 @@
                             showConfirmButton: false
                         });
                     },
-                    error: function(xhr) {
-                        console.log(xhr)
+                    error: function(xhr, status) {
+                        console.log(xhr.responseText)
+                        console.log(status)
                         if (xhr.status === 422) {
-                            let errors = xhr.responseJSON.errors;
-                            let errorMessages = Object.values(errors).flat();
+                            let errors = xhr.responseJSON?.errors || 'No Data Responses';
+                            // let errorMessages = Object.values(errors).flat();
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
-                                html: errorMessages.join('<br>'),
+                                html: errors,
                                 confirmButtonText: 'Okay'
                             });
                         } else {
@@ -227,10 +227,11 @@
                             $('#content-response').html(contentHTML);
                         }
                     },
-                    error: function(xhr) {
-                        console.log(xhr)
+                    error: function(xhr, status) {
+                        console.log(xhr.responseJSON.responseText)
+                        console.log(status)
                         if (xhr.status === 422) {
-                            let errors = xhr.responseJSON.errors;
+                            let errors = xhr.responseJSON.error;
                             let errorMessages = Object.values(errors).flat();
                             Swal.fire({
                                 icon: 'error',

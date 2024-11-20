@@ -3,93 +3,97 @@
     <div class="w-100 background">
 
         <div class="custom-container py-5 d-flex justify-content-center">
-            <div class="card shadow-lg">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">{{ $form->title }}</h4>
-                    <p class="mb-3">{!! $form->description !!}</p>
-                    <hr class="pb-3">
-                    <form method="POST" id="responses" action="{{ route('forms.user.store', $form->unique_url) }}">
+            <div class="before-card">
+                {{-- image --}}
+                <img src="{{ asset('img/w-group.png') }}" alt="W-Group Logo" class="img-fluid logo mb-4" />
+                <div class="card shadow-lg">
+                    <div class="card-body">
+                        <h4 class="fw-bold mb-3">{{ $form->title }}</h4>
+                        <p class="mb-3">{!! $form->description !!}</p>
+                        <hr class="pb-3">
+                        <form method="POST" id="responses" action="{{ route('forms.user.store', $form->unique_url) }}">
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Nama</label>
-                            <input type="text" name="name" class="form-control form-control-lg" placeholder="Nama">
-                            <div class="error-message"></div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Email</label>
-                            <input type="email" name="email" class="form-control form-control-lg" placeholder="Email">
-                            <div class="error-message"></div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Phone Number</label>
-                            <input type="text" name="phone" class="form-control form-control-lg" placeholder="Phone">
-                        </div>
-                        <hr class="pb-2">
-
-                        @csrf
-                        @foreach ($form->questions as $question)
                             <div class="mb-4">
-                                <label class="form-label fw-bold">{{ $question->question }}</label>
-                                <p class="mb-1" style="font-size: 10pt; margin-bottom: 0;">{{ isset($question->catatan) ? '*' . $question->catatan : '' }}</p>
-
-                                @switch($question->question_type_id)
-                                    @case(1)
-                                        <input type="{{ $question->type->type }}" name="{{ $form->unique_url . '[' . $question->id . ']' }}" class="form-control form-control-lg" placeholder="{{ $question->question }}"
-                                            @if ($question->is_required) required @endif>
-                                    @break
-
-                                    @case(2)
-                                        <textarea class="form-control form-control-lg" placeholder="{{ $question->question }}" name="{{ $form->unique_url . '[' . $question->id . ']' }}" rows="5" @if ($question->is_required) required @endif></textarea>
-                                    @break
-
-                                    @case(3)
-                                        @foreach (json_decode($question->options, true) as $option)
-                                            <div class="form-check form-check-inline mt-2">
-                                                <input class="form-check-input" type="{{ $question->type->type }}" name="{{ $form->unique_url . '[' . $question->id . ']' }}" value="{{ $option }}"
-                                                    @if ($question->is_required) required @endif>
-                                                <label class="form-check-label">
-                                                    {{ $option }}
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    @break
-
-                                    @case(4)
-                                        @foreach (json_decode($question->options, true) as $option)
-                                            <div class="form-check mt-2 form-check-inline">
-                                                <input class="form-check-input" type="{{ $question->type->type }}" name="{{ $form->unique_url . '[' . $question->id . '][]' }}" value="{{ $option }}" id="flexCheckDefault">
-                                                <label class="form-check-label" for="flexCheckDefault">
-                                                    {{ $option }}
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    @break
-
-                                    @case(5)
-                                        <select class="form-select" aria-label="Default select example" name="{{ $form->unique_url . '[' . $question->id . ']' }}" @if ($question->is_required) required @endif>
-                                            <option selected>Select ...</option>
-                                            @foreach (json_decode($question->options) as $option)
-                                                <option value="{{ $option }}">{{ $option }}</option>
-                                            @endforeach
-                                        </select>
-                                    @break
-
-                                    @default
-                                @endswitch
-
-                                <!-- Tempat untuk menampilkan pesan error -->
+                                <label class="form-label fw-bold">Nama</label>
+                                <input type="text" name="name" class="form-control form-control-lg" placeholder="Nama">
                                 <div class="error-message"></div>
                             </div>
-                        @endforeach
 
-                        <hr class="py-2">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Email</label>
+                                <input type="email" name="email" class="form-control form-control-lg" placeholder="Email">
+                                <div class="error-message"></div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <input type="text" name="phone" class="form-control form-control-lg" placeholder="Phone">
+                            </div>
+                            <hr class="pb-2">
 
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-primary" type="submit">Submit</button>
-                        </div>
-                    </form>
+                            @csrf
+                            @foreach ($form->questions as $question)
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">{{ $question->question }}</label>
+                                    <p class="mb-1" style="font-size: 10pt; margin-bottom: 0;">{{ isset($question->catatan) ? '*' . $question->catatan : '' }}</p>
 
+                                    @switch($question->question_type_id)
+                                        @case(1)
+                                            <input type="{{ $question->type->type }}" name="{{ $form->unique_url . '[' . $question->id . ']' }}" class="form-control form-control-lg" placeholder="{{ $question->question }}"
+                                                @if ($question->is_required) required @endif>
+                                        @break
+
+                                        @case(2)
+                                            <textarea class="form-control form-control-lg" placeholder="{{ $question->question }}" name="{{ $form->unique_url . '[' . $question->id . ']' }}" rows="5" @if ($question->is_required) required @endif></textarea>
+                                        @break
+
+                                        @case(3)
+                                            @foreach (json_decode($question->options, true) as $option)
+                                                <div class="form-check form-check-inline mt-2">
+                                                    <input class="form-check-input" type="{{ $question->type->type }}" name="{{ $form->unique_url . '[' . $question->id . ']' }}" value="{{ $option }}"
+                                                        @if ($question->is_required) required @endif>
+                                                    <label class="form-check-label">
+                                                        {{ $option }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        @break
+
+                                        @case(4)
+                                            @foreach (json_decode($question->options, true) as $option)
+                                                <div class="form-check mt-2 form-check-inline">
+                                                    <input class="form-check-input" type="{{ $question->type->type }}" name="{{ $form->unique_url . '[' . $question->id . '][]' }}" value="{{ $option }}" id="flexCheckDefault">
+                                                    <label class="form-check-label" for="flexCheckDefault">
+                                                        {{ $option }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        @break
+
+                                        @case(5)
+                                            <select class="form-select" aria-label="Default select example" name="{{ $form->unique_url . '[' . $question->id . ']' }}" @if ($question->is_required) required @endif>
+                                                <option selected>Select ...</option>
+                                                @foreach (json_decode($question->options) as $option)
+                                                    <option value="{{ $option }}">{{ $option }}</option>
+                                                @endforeach
+                                            </select>
+                                        @break
+
+                                        @default
+                                    @endswitch
+
+                                    <!-- Tempat untuk menampilkan pesan error -->
+                                    <div class="error-message"></div>
+                                </div>
+                            @endforeach
+
+                            <hr class="py-2">
+
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-primary" type="submit">Submit</button>
+                            </div>
+                        </form>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,12 +212,16 @@
         .custom-container {
             width: 100%;
             padding: 15px;
-            box-sizing: border-box;
+            /* box-sizing: border-box; */
         }
 
-        .card {
+        .before-card {
             width: 100%;
             margin: 0 auto;
+        }
+
+        .logo {
+            width: 40%;
         }
 
         .card-body {
@@ -228,6 +236,10 @@
                 padding: 20px;
                 margin: 0 auto;
             }
+
+            .logo {
+                width: 30%;
+            }
         }
 
         @media (min-width: 1024px) {
@@ -237,6 +249,10 @@
                 width: 60%;
                 padding: 25px;
                 margin: 0 auto;
+            }
+
+            .logo {
+                width: 20%;
             }
         }
     </style>

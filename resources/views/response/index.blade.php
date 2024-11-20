@@ -48,8 +48,8 @@
                         name: 'title'
                     },
                     {
-                        data: 'updated_at',
-                        name: 'updated_at'
+                        data: 'published_at',
+                        name: 'published_at'
                     },
                     {
                         data: 'total_response',

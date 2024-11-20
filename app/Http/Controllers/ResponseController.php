@@ -6,6 +6,7 @@ use App\Models\Form;
 use App\Models\Question;
 use App\Models\Response;
 use App\Models\ResponseDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +21,9 @@ class ResponseController extends Controller
             $data = Form::with('responses')->get(); // Ganti dengan query sesuai kebutuhan
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('published_at', function ($row) {
+                    return Carbon::parse($row->updated_at)->locale('id')->format('j F Y');
+                })
                 ->addColumn('total_response', function ($row) {
                     return count($row->responses);
                 })
@@ -76,61 +80,66 @@ class ResponseController extends Controller
             }
         }
 
-        $question_forms = Question::whereIn('id', $questions)->get();
+        if (count($questions) > 0) {
+            $question_forms = Question::whereIn('id', $questions)->get();
 
-        $rows = [];
-        foreach ($form->responses as $key => $response) {
+            $rows = [];
+            foreach ($form->responses as $key => $response) {
 
-            $row = [
-                'name' => $response->name,
-                'email' => $response->email,
-                'phone' => $response->phone
-            ];
+                $row = [
+                    'name' => $response->name,
+                    'email' => $response->email,
+                    'phone' => $response->phone
+                ];
 
-            foreach ($question_forms as $question) {
-                $answer = '';
-                foreach ($response->details as $detail) {
-                    if ($detail->question_id == $question->id) {
+                foreach ($question_forms as $question) {
+                    $answer = '';
+                    foreach ($response->details as $detail) {
+                        if ($detail->question_id == $question->id) {
 
-                        if ($detail->question->question_type_id == 4) {
-                            $data = json_decode($detail->answer);
-                            $answer = implode(', ', $data);
-                        } else {
-                            $answer = $detail->answer;
+                            if ($detail->question->question_type_id == 4) {
+                                $data = json_decode($detail->answer);
+                                $answer = implode(', ', $data);
+                            } else {
+                                $answer = $detail->answer;
+                            }
+                            break;
                         }
-                        break;
                     }
+
+                    $row[$question->question] = $answer;
                 }
 
-                $row[$question->question] = $answer;
+                $rows[] = $row;
             }
 
-            $rows[] = $row;
+            // Menyusun header berdasarkan question_id
+            $headers = array_merge(['name', 'email', 'phone'], $question_forms->map(function ($form) {
+                return $form->question;
+            })->toArray());
+
+            $headers = array_values($headers);
+
+            // Menentukan file output untuk menulis
+            $path = 'response-' . $form->slug . '.xlsx';
+
+            // Menulis data ke dalam file Excel
+            $writer =  SimpleExcelWriter::create(storage_path($path))
+                ->addHeader(array_values($headers))
+                ->addRows($rows);
+
+            $writer->close();
+
+            $filePath = storage_path($path);
+
+            return response()->file($filePath, [
+                'Content-Disposition' => 'attachment; filename="' . $path . '"'
+            ])->deleteFileAfterSend(true);
+        } else {
+            return response()->json([
+                'error' => 'No Data Response'
+            ], 422);
         }
-
-        // Menyusun header berdasarkan question_id
-        $headers = array_merge(['name', 'email', 'phone'], $question_forms->map(function ($form) {
-            return $form->question;
-        })->toArray());
-
-        $headers = array_values($headers);
-
-        // Menentukan file output untuk menulis
-        $path = 'response-' . $form->slug . '.xlsx';
-
-        // Menulis data ke dalam file Excel
-        $writer =  SimpleExcelWriter::create(storage_path($path))
-            ->addHeader(array_values($headers))
-            ->addRows($rows);
-
-        $writer->close();
-
-        $filePath = storage_path($path);
-        // chmod($filePath, 0755);
-
-        return response()->file($filePath, [
-            'Content-Disposition' => 'attachment; filename="' . $path . '"'
-        ])->deleteFileAfterSend(true);
     }
 
     public function showForUser($unique_url)
