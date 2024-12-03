@@ -13,13 +13,19 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('form_id')->constrained()->onDelete('cascade');
+            $table->foreignId('question_type_id')->constrained()->onDelete('cascade');
+
             $table->longText('question');
             $table->longText('slug');
             $table->longText('catatan')->nullable();
-            $table->foreignId('question_type_id')->constrained()->onDelete('cascade');
             $table->boolean('is_required');
+
             $table->json('options')->nullable();
+            $table->boolean('has_additional_question');
+
+            $table->integer('order');
             $table->timestamps();
         });
     }

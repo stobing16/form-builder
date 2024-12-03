@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Response extends Model
 {
     use HasFactory;
-    protected $fillable = ['form_id', 'name', 'email', 'phone'];
+    protected $fillable = ['form_id'];
 
-    public function details()
-    {
-        return $this->hasMany(ResponseDetail::class);
-    }
 
     public function form()
     {
         return $this->belongsTo(Form::class);
+    }
+
+    public function details()
+    {
+        return $this->hasMany(ResponseDetail::class);
     }
 }

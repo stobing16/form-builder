@@ -1,3 +1,4 @@
+@section('title', 'Forms')
 @extends('layouts.admin')
 
 @section('content')
@@ -69,9 +70,55 @@
                 window.location.href = "{{ route('forms.show', ':id') }}".replace(':id', id);
             })
 
-            $(document).on('click', '.edit', function() {
+            $(document).on('click', '.response', function() {
                 const id = $(this).data('id');
-                window.location.href = "{{ route('forms.edit', ':id') }}".replace(':id', id);
+                window.location.href = "{{ route('response.show', ':id') }}".replace(':id', id);
+            })
+
+            $(document).on('click', '.delete', function() {
+                const id = $(this).data('id');
+                const deleteUrl = `{{ route('forms.delete', ['id' => ':id']) }}`.replace(':id', id);
+
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak bisa dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: deleteUrl,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload(); // Reload halaman setelah penghapusan
+                                });
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: xhr.responseJSON.message || 'Terjadi kesalahan, coba lagi nanti.'
+                                });
+                            }
+                        });
+                    }
+                });
+                // window.location.href = "{{ route('forms.edit', ':id') }}".replace(':id', id);
             })
         });
     </script>

@@ -1,3 +1,4 @@
+@section('title', 'Edit Pertanyaan')
 @extends('layouts.admin')
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -43,6 +44,15 @@
                         <div class="options-container mb-3" id="options-{{ $question->id ?? '0' }}" style="{{ !is_null($question->options) ? 'display: block;' : 'display: none;' }}">
                             <label class="form-label fw-bold">Options</label>
                             @if (!is_null($question->options))
+                                @if ($question->has_additional_question || $question->question_type_id == 4)
+                                    <div class="checkbox-additional-form mb-2">
+                                        <input {{ $question->has_additional_question ? 'checked' : '' }} class="form-check-input" type="checkbox" name="has_additional_question" value="yes" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                            <small class="fw-semibold">Tambahkan Opsi Lainnya ...</small>
+                                        </label>
+                                        <p style="font-size: 9pt;" class="fw-light">akan menambahkan form input pilihan lainnya</p>
+                                    </div>
+                                @endif
                                 @foreach (json_decode($question->options, true) as $option)
                                     <div class="mb-4 options-form-group row">
                                         <div class="col-11">
@@ -104,6 +114,7 @@
                 const hasOptions = $(this).find('option:selected').data('has-options');
                 const questionId = $(this).closest('.form-group').data('question-id');
                 const optionsContainer = $(optionsContainerSelector + `#options-${questionId}`);
+                const checkboxAdditionalForm = optionsContainer.find('.checkbox-additional-form');
 
                 // optionsContainer.toggle(hasOptions);
                 if (hasOptions) {
@@ -112,6 +123,13 @@
                         const oldValue = $(this).data('old-value');
                         if (oldValue) $(this).val(oldValue);
                     });
+
+                    const selectedQuestionType = $(this).val();
+                    if (selectedQuestionType == 4) {
+                        checkboxAdditionalForm.show();
+                    } else {
+                        checkboxAdditionalForm.hide();
+                    }
                 } else {
                     optionsContainer.hide();
                 }
@@ -222,12 +240,15 @@
                         }
                     });
 
+                    if (structuredData.type != 4) {
+                        delete structuredData.has_additional_question
+                        console.log(structuredData)
+                    }
+
                     // Handle option validation
                     if (structuredData.options.length === 0 || structuredData.options.every(opt => opt === "")) {
                         structuredData.options = null; // Set to null if no valid options
                     }
-
-                    // console.log(structuredData);
 
                     $.ajax({
                         url: $(this).attr('action'), // URL action form

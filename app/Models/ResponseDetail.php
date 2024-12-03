@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ResponseDetail extends Model
 {
     use HasFactory;
-    protected $fillable = ['response_id', 'question_id', 'answer'];
+    protected $fillable = ['response_id', 'question_id', 'answer', 'additional_answer'];
 
     public function question()
     {

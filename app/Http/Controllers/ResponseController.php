@@ -39,7 +39,7 @@ class ResponseController extends Controller
 
     public function show($id)
     {
-        $responses = Response::select(['id', 'name'])->where('form_id', $id)->get();
+        $responses = Response::with('details', 'form')->where('form_id', $id)->get();
         return view('response.show', compact('id', 'responses'));
     }
 
@@ -51,6 +51,7 @@ class ResponseController extends Controller
                 response_details.id,
                 questions.question as question,
                 response_details.answer as answer,
+                response_details.additional_answer as additional_answer,
                 question_types.type as type,
                 questions.options as options
             FROM response_details
@@ -59,7 +60,7 @@ class ResponseController extends Controller
             WHERE response_id = ?;
         ", [$id]);
 
-        $user = Response::select(['phone', 'email'])->findOrFail($id);
+        $user = Response::findOrFail($id);
 
         return response()->json([
             'response' => $responses,
@@ -84,14 +85,7 @@ class ResponseController extends Controller
             $question_forms = Question::whereIn('id', $questions)->get();
 
             $rows = [];
-            foreach ($form->responses as $key => $response) {
-
-                $row = [
-                    'name' => $response->name,
-                    'email' => $response->email,
-                    'phone' => $response->phone
-                ];
-
+            foreach ($form->responses as $response) {
                 foreach ($question_forms as $question) {
                     $answer = '';
                     foreach ($response->details as $detail) {
@@ -99,11 +93,16 @@ class ResponseController extends Controller
 
                             if ($detail->question->question_type_id == 4) {
                                 $data = json_decode($detail->answer);
+
+                                if (isset($detail->additional_answer)) {
+                                    $data[] = $detail->additional_answer;
+                                }
+
                                 $answer = implode(', ', $data);
                             } else {
                                 $answer = $detail->answer;
                             }
-                            break;
+                            // break;
                         }
                     }
 
@@ -113,15 +112,12 @@ class ResponseController extends Controller
                 $rows[] = $row;
             }
 
-            // Menyusun header berdasarkan question_id
-            $headers = array_merge(['name', 'email', 'phone'], $question_forms->map(function ($form) {
+            $headers = array_merge($question_forms->map(function ($form) {
                 return $form->question;
             })->toArray());
 
             $headers = array_values($headers);
-
-            // Menentukan file output untuk menulis
-            $path = 'response-' . $form->slug . '.xlsx';
+            $path = date("Ymd", time()) . '-response-' . $form->slug . '.xlsx';
 
             // Menulis data ke dalam file Excel
             $writer =  SimpleExcelWriter::create(storage_path($path))
@@ -129,7 +125,6 @@ class ResponseController extends Controller
                 ->addRows($rows);
 
             $writer->close();
-
             $filePath = storage_path($path);
 
             return response()->file($filePath, [
@@ -144,13 +139,20 @@ class ResponseController extends Controller
 
     public function showForUser($unique_url)
     {
-        $form = Form::with('questions.type')->where('unique_url', $unique_url)->firstOrFail();
-        return view('forms', compact('form'));
+        $form = Form::where('unique_url', $unique_url)->firstOrFail();
+        $questions = Question::with('type')->where('form_id', $form->id)->orderBy('order', 'asc')->get();
+        return view('forms', compact('form', 'questions'));
     }
 
     public function success()
     {
         return view('success-forms');
+    }
+
+    public function successUnique($unique_url)
+    {
+        $form = Form::with('questions.type')->where('unique_url', $unique_url)->firstOrFail();
+        return view('success-forms', compact('form'));
     }
 
     public function storeForUser(Request $request, $unique_url)
@@ -160,9 +162,6 @@ class ResponseController extends Controller
         // Membuat aturan validasi dinamis
         $rules = [];
 
-        $rules['name'] = 'required';
-        $rules['email'] = 'required|email';
-
         foreach ($form->questions as $question) {
             if ($question->is_required) {
                 $rules[$form->unique_url . '.' . $question->id] = 'required';
@@ -170,28 +169,41 @@ class ResponseController extends Controller
         }
 
         // Validasi data yang diterima
-        $validatedData = $request->validate($rules, [
+        $request->validate($rules, [
             'required' => 'Harap isi :attribute.'
         ]);
 
         DB::beginTransaction();
         try {
 
-            $response = Response::create([
-                'form_id' => $form->id,
-                'name' => $request['name'],
-                'email' => $request['email'],
-                'phone' => $request['phone'],
+            $res = Response::create([
+                'form_id' => $form->id
             ]);
 
             foreach ($request[$unique_url] as $key => $value) {
+
+                $additional_answer = null;
+
+                if (is_array($value)) {
+                    $intKeys = array_filter($value, function ($key) {
+                        return is_int($key); // Mengambil elemen dengan key integer
+                    }, ARRAY_FILTER_USE_KEY);
+
+                    $nonIntegerKeys = array_filter($value, function ($key) {
+                        return !is_int($key); // Mengambil elemen dengan key non-integer
+                    }, ARRAY_FILTER_USE_KEY);
+
+                    $value = $intKeys;
+                    $additional_answer = isset($nonIntegerKeys['additional_answer']) ? $nonIntegerKeys['additional_answer'] : null;
+                }
+
                 ResponseDetail::create([
-                    'response_id' => $response->id,
+                    'response_id' => $res->id,
                     'question_id' => $key,
                     'answer' => is_array($value) ? json_encode($value) : $value,
+                    'additional_answer' => isset($additional_answer) ? $additional_answer : null,
                 ]);
             }
-
             DB::commit();
             return response()->json([
                 "message" => "Response Successfully Submited"

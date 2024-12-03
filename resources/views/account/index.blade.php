@@ -1,16 +1,29 @@
 @extends('layouts.admin')
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-md-flex justify-content-between align-items-center mb-3">
         <h3>Account</h3>
-        <a href="{{ route('forms.create') }}" type="button" class="btn btn-primary">
+        <a href="{{ route('account.change-password') }}" type="button" class="btn btn-primary">
             Change Password
         </a>
     </div>
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+    <div class="container">
+        <div class="row g-2">
+            <div class="col-12 col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ ucfirst(auth()->user()->name) }}</h5>
+                        <p class="card-text"><small>Email : {{ auth()->user()->email }}</small></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Form yang dibuat</h5>
+                        {{-- <p class="card-text fs-6">Email : {{ auth()->user()->email }}</p> --}}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {{-- <div class="card">

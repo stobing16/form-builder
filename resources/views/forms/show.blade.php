@@ -1,3 +1,4 @@
+@section('title', 'Detail Form')
 @extends('layouts.admin')
 
 @section('content')
@@ -36,7 +37,7 @@
             <div class="mb-3">
                 <label class="fw-bold">Pertanyaan :</label>
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover" id="questions-table">
+                    <table class="table table-striped table-bordered table-hover" id="questions-table" data-id="{{ $form->id }}">
                         <thead class="thead-light">
                             <tr>
                                 <th>No</th>
@@ -44,33 +45,11 @@
                                 <th>Type</th>
                                 <th>Required</th>
                                 <th>Option</th>
+                                <th>Order</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($form->questions as $question)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $question->question }}</td>
-                                    <td>{{ $question->type->label }}</td>
-                                    <td>{{ $question->is_required ? 'Ya' : 'Tidak' }}</td>
-                                    <td>
-                                        @if (isset($question->options))
-                                            <ul>
-                                                @foreach (json_decode($question->options, true) as $item)
-                                                    <li>{{ $item }}</li>
-                                                @endforeach
-                                            </ul>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-sm btn-warning edit" href="{{ route('questions.edit', $question->id) }}">Edit</a>
-                                        <a class="btn btn-sm btn-danger delete" data-id="{{ $question->id }}">Delete</a>
-                                    </td>
-                                </tr>
-                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -80,79 +59,9 @@
     <div class="card">
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-between">
-
-                <h4 class="fw-bold mb-3">Contoh Form:</h4>
+                <h4 class="fw-bold mb-3">Contoh Form </h4>
                 <a href="{{ route('forms.preview', $form->unique_url) }}" class="btn btn-primary preview">Preview</a>
-                {{-- <h4 class="fw-bold mb-3">Preview</h4> --}}
             </div>
-            <hr class="pb-2">
-
-            <div class="mb-4">
-                <label class="form-label fw-bold">Nama</label>
-                <input type="text" name="name" class="form-control form-control-lg" placeholder="Nama">
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label fw-bold">Email</label>
-                <input type="email" name="email" class="form-control form-control-lg" placeholder="Email">
-            </div>
-            <div class="mb-4">
-                <label class="form-label fw-bold">Phone Number</label>
-                <input type="text" name="phone" class="form-control form-control-lg" placeholder="Phone">
-            </div>
-
-            <hr class="pb-2">
-            @foreach ($form->questions as $question)
-                <div class="mb-4">
-                    <label class="form-label fw-bold">{{ $question->question }}</label>
-                    @if (isset($question->catatan))
-                        <p class="mb-1" style="font-size: 10pt; margin-bottom: 0;">*{{ $question->catatan }}</p>
-                    @endif
-
-                    @switch($question->question_type_id)
-                        @case(1)
-                            <input type="{{ $question->type->type }}" name="{{ 'form-' . $form->id . '[' . $question->id . ']' }}" class="form-control form-control-lg" placeholder="{{ $question->question }}">
-                        @break
-
-                        @case(2)
-                            <textarea class="form-control form-control-lg" placeholder="{{ $question->question }}" name="{{ 'form-' . $form->id . '[' . $question->id . ']' }}" rows="5"></textarea>
-                        @break
-
-                        @case(3)
-                            @foreach (json_decode($question->options, true) as $option)
-                                <div class="form-check">
-                                    <input class="form-check-input" type="{{ $question->type->type }}" name="{{ 'form-' . $form->id . '[' . $question->id . ']' }}">
-                                    <label class="form-check-label">
-                                        {{ $option }}
-                                    </label>
-                                </div>
-                            @endforeach
-                        @break
-
-                        @case(4)
-                            @foreach (json_decode($question->options, true) as $option)
-                                <div class="form-check mt-2 form-check-inline">
-                                    <input class="form-check-input" type="{{ $question->type->type }}" name="{{ 'form-' . $form->id . '[' . $question->id . ']' }}" value="" id="flexCheckDefault">
-                                    <label class="form-check-label" for="flexCheckDefault">
-                                        {{ $option }}
-                                    </label>
-                                </div>
-                            @endforeach
-                        @break
-
-                        @case(5)
-                            <select class="form-select" aria-label="Default select example" name="{{ 'form-' . $form->id . '[' . $question->id . ']' }}">
-                                <option selected>Select ...</option>
-                                @foreach (json_decode($question->options) as $option)
-                                    <option value="{{ $option }}">{{ $option }}</option>
-                                @endforeach
-                            </select>
-                        @break
-
-                        @default
-                    @endswitch
-                </div>
-            @endforeach
         </div>
     </div>
 @endsection
@@ -160,7 +69,101 @@
 @push('script')
     <script>
         $(document).ready(function() {
-            $('#questions-table').DataTable();
+
+            const id = $('#questions-table').data('id');
+            const url = "{{ route('forms.show', ':id') }}".replace(':id', id);
+
+            let datatable = $('#questions-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: url,
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'question',
+                        name: 'question'
+                    },
+                    {
+                        data: 'label',
+                        name: 'label',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'required',
+                        name: 'required',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        name: 'options',
+                        orderable: false,
+                        searchable: false,
+                        data: function(row) {
+                            if (typeof row.option_values != 'undefined' && row.option_values != null) {
+                                let html = '<ul>';
+                                row.option_values.forEach(function(option) {
+                                    html += '<li>' + option + '</li>';
+                                });
+                                html += '</ul>';
+                                return html;
+                            }
+                            return "-";
+                        },
+                    },
+                    {
+                        data: 'order',
+                        name: 'order',
+                        render: function(data, type, row) {
+                            let options = '';
+                            let length = datatable.data().length
+
+                            for (let i = 1; i <= length; i++) { // Assuming max 10 orders, modify based on your use case
+                                options += `<option value="${i}" ${data === i ? 'selected' : ''}>${i}</option>`;
+                            }
+                            return `<select class="order-select form-select w-100" data-id="${row.id}">${options}</select>`;
+                        }
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+            });
+
+            $('#questions-table').on('change', '.order-select', function() {
+                let newOrder = $(this).val();
+                let questionId = $(this).data('id');
+
+                let url = "{{ route('forms.update-order') }}"
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        id: questionId,
+                        order: newOrder,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Order updated successfully!');
+                            datatable.draw()
+                        } else {
+                            alert('Failed to update order.');
+                        }
+                    },
+                    error: function() {
+                        alert('Error while updating order.');
+                    }
+                });
+            });
 
             $('#copyButton').on('click', function() {
                 const link = $('#shareableLink');
@@ -185,7 +188,13 @@
                 }
             });
 
-            $('.delete').on('click', function() {
+            $(document).on('click', '.edit', function() {
+                const id = $(this).data('id')
+                const editUrl = `{{ route('questions.edit', ['id' => ':id']) }}`.replace(':id', id)
+                window.location.href = editUrl
+            })
+
+            $(document).on('click', '.delete', function() {
                 const id = $(this).data('id')
                 const deleteUrl = `{{ route('questions.delete', ['id' => ':id']) }}`.replace(':id', id);
 
@@ -215,7 +224,7 @@
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    location.reload(); // Reload halaman setelah penghapusan
+                                    datatable.draw(); // Reload halaman setelah penghapusan
                                 });
                             },
                             error: function(xhr) {

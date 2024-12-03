@@ -27,6 +27,7 @@ class QuestionController extends Controller
         ]);
 
         try {
+            $count = Question::where('form_id', $id)->count();
             Question::create([
                 'form_id' => $id,
                 'question' => $request->name,
@@ -35,6 +36,8 @@ class QuestionController extends Controller
                 'question_type_id' => $request->type,
                 'is_required' => isset($request->is_required) ? true :  false,
                 'options' => !empty($request->options) ? json_encode($request->options) : null,
+                'order' => $count + 1,
+                'has_additional_question' => isset($request->has_additional_question) ? true : false,
             ]);
 
             return response()->json([
@@ -72,6 +75,7 @@ class QuestionController extends Controller
             $question->catatan = $request->catatan;
             $question->is_required = isset($request->is_required) ? true :  false;
             $question->options = !empty($request->options) ? json_encode($request->options) : null;
+            $question->has_additional_question = isset($request->has_additional_question) ? true : false;
             $question->save();
 
             return response()->json([

@@ -30,11 +30,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [FormController::class, 'show'])->name('forms.show');
         Route::get('/edit/{id}', [FormController::class, 'edit'])->name('forms.edit');
 
+        Route::post('/update-order', [FormController::class, 'updateOrderForm'])->name('forms.update-order');
+
         Route::get('/preview/{unique_url}', [FormController::class, 'preview'])->name('forms.preview');
-        Route::post('/preview/{unique_url}', [FormController::class, 'previewStore'])->name('forms.preview.store');
+        // Route::post('/preview/{unique_url}', [FormController::class, 'previewStore'])->name('forms.preview.store');
 
         Route::post('/store', [FormController::class, 'store'])->name('forms.store');
         Route::put('/{id}', [FormController::class, 'update'])->name('forms.update');
+        Route::delete('/{id}', [FormController::class, 'delete'])->name('forms.delete');
 
         Route::prefix('question')->group(function () {
             Route::get('/create/{form_id}', [QuestionController::class, 'create'])->name('questions.create');
@@ -76,5 +79,6 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/d/{unique_url}', [ResponseController::class, 'showForUser'])->name('forms.user');
 Route::post('/d/{unique_url}', [ResponseController::class, 'storeForUser'])->name('forms.user.store');
 Route::get('/s', [ResponseController::class, 'success'])->name('forms.user.success');
+Route::get('/s/{unique_url}', [ResponseController::class, 'successUnique'])->name('forms.user.success-unique');
 
 require __DIR__ . '/auth.php';

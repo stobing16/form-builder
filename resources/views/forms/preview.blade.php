@@ -1,5 +1,5 @@
+@section('title', 'Preview Form')
 @extends('layouts.admin')
-
 @section('content')
     <div class="card">
         <div class="card-body">
@@ -7,24 +7,8 @@
             <p class="mb-3">{!! $form->description !!}</p>
             <hr class="pb-2">
 
-            <form method="POST" id="responses" action="{{ route('forms.preview.store', $form->unique_url) }}">
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Nama</label>
-                    <input type="text" name="name" class="form-control form-control-lg" placeholder="Nama">
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Email</label>
-                    <input type="email" name="email" class="form-control form-control-lg" placeholder="Email">
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Phone Number</label>
-                    <input type="text" name="phone" class="form-control form-control-lg" placeholder="Phone">
-                </div>
-
-                <hr class="pb-2">
-                @foreach ($form->questions as $question)
+            <form method="POST" id="responses" action="#">
+                @foreach ($questions as $question)
                     <div class="mb-4">
                         <label class="form-label fw-bold">{{ $question->question }}</label>
                         <p class="mb-1" style="font-size: 10pt; margin-bottom: 0;">{{ isset($question->catatan) ? '*' . $question->catatan : '' }}</p>
@@ -59,6 +43,20 @@
                                         </label>
                                     </div>
                                 @endforeach
+                                @if ($question->has_additional_question)
+                                    <div class="form-check mt-2 form-check-inline">
+                                        <input class="form-check-input check-others" id="other-{{ $question->id }}" type="{{ $question->type->type }}" data-id="{{ $question->id }}" name="other-value-{{ $form->unique_url }}" value="">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                            Lainnya ...
+                                        </label>
+                                    </div>
+
+                                    <!-- Form tambahan yang akan ditampilkan setelah checkbox diklik -->
+                                    <div id="additional_answer_{{ $question->id }}" class="mt-2" style="display:none;">
+                                        <label for="additional_answer" class="form-label">Lainnya :</label>
+                                        <input type="text" id="additional_answer" class="form-control form-control-lg" name="{{ $form->unique_url . '[' . $question->id . '][additional_answer]' }}">
+                                    </div>
+                                @endif
                             @break
 
                             @case(5)
@@ -91,34 +89,50 @@
         $(document).ready(function() {
             $('#responses').validate({
                 rules: {
-                    name: {
-                        required: true
-                    },
-                    email: {
-                        required: true,
-                        email: true
-                    },
-                    @foreach ($form->questions as $question)
+                    @foreach ($questions as $question)
                         @if ($question->is_required)
-                            '{{ $form->unique_url }}[{{ $question->id }}]': {
+                            "{{ $form->unique_url }}[{{ $question->id }}]": {
                                 required: true
                             },
+
+                            // Validasi untuk grup checkbox
+                            @if ($question->question_type_id == 4)
+                                '{{ $form->unique_url }}[{{ $question->id }}][]': {
+                                    required: true
+                                },
+                            @endif
+
+                            @if ($question->has_additional_question)
+                                // Validasi untuk "Others"
+                                '{{ $form->unique_url }}[{{ $question->id }}][additional_answer]': {
+                                    required: function() {
+                                        // Cek apakah "Others" dicentang
+                                        return $('input[name="other-value-{{ $form->unique_url }}"]:checked').length > 0;
+                                    }
+                                },
+                            @endif
                         @endif
                     @endforeach
                 },
                 messages: {
-                    name: {
-                        required: "Harap isi Form ini"
-                    },
-                    email: {
-                        required: "Harap isi Form ini",
-                        email: "Value Form harus dalam format email"
-                    },
-                    @foreach ($form->questions as $question)
+                    @foreach ($questions as $question)
                         @if ($question->is_required)
                             '{{ $form->unique_url }}[{{ $question->id }}]': {
                                 required: "Harap isi pertanyaan ini."
                             },
+
+                            // Validasi untuk grup checkbox
+                            @if ($question->question_type_id == 4)
+                                '{{ $form->unique_url }}[{{ $question->id }}][]': {
+                                    required: "Harap pilih setidaknya satu opsi."
+                                },
+                            @endif
+
+                            @if ($question->has_additional_question)
+                                '{{ $form->unique_url }}[{{ $question->id }}][additional_answer]': {
+                                    required: "Harap isi jawaban Anda jika memilih 'Lainnya'."
+                                },
+                            @endif
                         @endif
                     @endforeach
                 },
@@ -137,49 +151,38 @@
                 }
             });
 
+            $('.check-others').change(function() {
+                const id = $(this).data('id')
+                const additionalForm = $(`#additional_answer_${id}`);
+                if ($(this).is(':checked')) {
+                    additionalForm.show();
+                } else {
+                    additionalForm.hide();
+                }
+            });
+
             $('#responses').on('submit', function(e) {
                 e.preventDefault()
 
                 if ($(this).valid()) { // Memeriksa validasi
                     const actionUrl = $(this).attr('action');
                     const formData = $(this).serializeArray();
-                    console.log(formData)
 
-                    // $.ajax({
-                    //     url: actionUrl,
-                    //     type: 'POST',
-                    //     data: formData,
-                    //     // contentType: 'application/json',
-                    //     headers: {
-                    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    //     },
-                    //     success: function(response) {
-                    //         Swal.fire({
-                    //             icon: 'success',
-                    //             title: 'Success!',
-                    //             text: response.message,
-                    //             timer: 1500,
-                    //             showConfirmButton: false
-                    //         }).then(() => {
-                    //             // Reset form setelah sukses
-                    //             $('#responses')[0].reset();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: "Test Submit Berhasil",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // Reset form setelah sukses
+                        $('#responses')[0].reset();
 
-                    //             // Reset validasi tampilan
-                    //             $('#responses').find('.is-invalid').removeClass('is-invalid');
-                    //             $('#responses').find('.valid').removeClass('valid');
-                    //             $('#responses').find('.error-message').empty();
-                    //         });
-                    //     },
-                    //     error: function(xhr, status, error) {
-                    //         var errors = xhr.responseJSON.errors;
-                    //         var errorMessage = '<ul>';
-                    //         $.each(errors, function(key, value) {
-                    //             errorMessage += '<li>' + value[0] + '</li>'; // Ambil pesan error pertama
-                    //         });
-                    //         errorMessage += '</ul>';
-                    //         $('#error-messages').html(errorMessage).removeClass('d-none');
-                    //     }
-                    // });
+                        // Reset validasi tampilan
+                        $('#responses').find('.is-invalid').removeClass('is-invalid');
+                        $('#responses').find('.valid').removeClass('valid');
+                        $('#responses').find('.error-message').empty();
+                    });
                 }
             })
         })

@@ -1,4 +1,6 @@
+@section('title', 'Tambah Pertanyaan')
 @extends('layouts.admin')
+
 @section('content')
     <h3>Tambah Pertanyaan</h3>
     <p>Form : {{ $form->title }} </p>
@@ -40,6 +42,13 @@
                         </div>
                         <div class="options-container mb-3" id="options-0" style="display: none;">
                             <label class="form-label fw-bold">Options</label>
+                            <div class="checkbox-additional-form mb-2" style="display: none;">
+                                <input class="form-check-input" type="checkbox" name="has_additional_question" value="yes" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    <small class="fw-semibold">Tambahkan Opsi Lainnya ...</small>
+                                </label>
+                                <p style="font-size: 9pt;" class="fw-light">akan menambahkan form input pilihan lainnya</p>
+                            </div>
                             <div class="mb-4 options-form-group row">
                                 <div class="col-11">
                                     <input type="text" class="form-control" name="options[]" placeholder="Opsi">
@@ -77,9 +86,17 @@
                 const hasOptions = $(this).find('option:selected').data('has-options');
                 const questionId = $(this).closest('.form-group').data('question-id');
                 const optionsContainer = $('#options-' + questionId);
+                const checkboxAdditionalForm = optionsContainer.find('.checkbox-additional-form');
 
                 if (hasOptions) {
                     optionsContainer.show();
+
+                    const selectedQuestionType = $(this).val();
+                    if (selectedQuestionType == 4) {
+                        checkboxAdditionalForm.show();
+                    } else {
+                        checkboxAdditionalForm.hide();
+                    }
                 } else {
                     optionsContainer.hide();
                     optionsContainer.find('input').val('');
@@ -205,8 +222,6 @@
                     if (structuredData.options.length === 0 || structuredData.options.every(opt => opt === "")) {
                         structuredData.options = null; // Set to null if no valid options
                     }
-
-                    console.log(structuredData);
 
                     $.ajax({
                         url: $(this).attr('action'), // URL action form

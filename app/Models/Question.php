@@ -9,7 +9,17 @@ class Question extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['form_id', 'question', 'catatan', 'slug', 'question_type_id', 'is_required', 'options'];
+    protected $fillable = [
+        'form_id',
+        'question',
+        'catatan',
+        'slug',
+        'question_type_id',
+        'is_required',
+        'options',
+        'order',
+        'has_additional_question'
+    ];
 
     public function type()
     {
